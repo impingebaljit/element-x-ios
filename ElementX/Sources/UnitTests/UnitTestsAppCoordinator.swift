@@ -27,11 +27,9 @@ class UnitTestsAppCoordinator: AppCoordinatorProtocol {
         AppSettings.resetAllSettings()
         ServiceLocator.shared.register(appSettings: AppSettings())
         ServiceLocator.shared.register(bugReportService: BugReportServiceMock())
-        
-        let analyticsClient = AnalyticsClientMock()
-        analyticsClient.isRunning = false
-        ServiceLocator.shared.register(analytics: AnalyticsService(client: analyticsClient,
-                                                                   appSettings: ServiceLocator.shared.settings))
+        ServiceLocator.shared.register(analytics: AnalyticsService(client: AnalyticsClientMock(),
+                                                                   appSettings: ServiceLocator.shared.settings,
+                                                                   bugReportService: ServiceLocator.shared.bugReportService))
     }
     
     func start() { }
@@ -41,10 +39,6 @@ class UnitTestsAppCoordinator: AppCoordinatorProtocol {
     }
     
     func handleDeepLink(_ url: URL, isExternalURL: Bool) -> Bool {
-        fatalError("Not implemented.")
-    }
-    
-    func handleUserActivity(_ activity: NSUserActivity) {
         fatalError("Not implemented.")
     }
 }

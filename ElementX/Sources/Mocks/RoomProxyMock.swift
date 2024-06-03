@@ -58,7 +58,7 @@ enum RoomProxyMockError: Error {
 
 extension RoomProxyMock {
     @MainActor
-    convenience init(_ configuration: RoomProxyMockConfiguration) {
+    convenience init(with configuration: RoomProxyMockConfiguration) {
         self.init()
 
         id = configuration.id
@@ -140,7 +140,6 @@ extension RoomProxyMock {
         widgetDriver.startBaseURLClientIDReturnValue = .success(url)
         
         elementCallWidgetDriverReturnValue = widgetDriver
-        sendCallNotificationIfNeeededReturnValue = .success(())
         
         matrixToPermalinkReturnValue = .success(.homeDirectory)
         matrixToEventPermalinkReturnValue = .success(.homeDirectory)

@@ -17,10 +17,11 @@
 import AnalyticsEvents
 import BackgroundTasks
 import Combine
-import Intents
 import MatrixRustSDK
 import SwiftUI
 import Version
+
+// MARK: - App Coordinator For Pushing the Views
 
 class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDelegate, NotificationManagerDelegate, SecureWindowManagerDelegate {
     private let stateMachine: AppCoordinatorStateMachine
@@ -29,7 +30,6 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
     private let appMediator: AppMediator
     private let appSettings: AppSettings
     private let appDelegate: AppDelegate
-    private let elementCallService: ElementCallServiceProtocol
 
     /// Common background task to continue long-running tasks in the background.
     private var backgroundTask: UIBackgroundTaskIdentifier?
@@ -68,6 +68,8 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
         windowManager = WindowManager(appDelegate: appDelegate)
         appMediator = AppMediator(windowManager: windowManager)
         
+        Self.setupEnvironmentVariables()
+        
         let appSettings = AppSettings()
         
         MXLog.configure(logLevel: appSettings.logLevel)
@@ -85,22 +87,9 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
         self.appSettings = appSettings
         appRouteURLParser = AppRouteURLParser(appSettings: appSettings)
         
-        elementCallService = ElementCallService()
-        
         navigationRootCoordinator = NavigationRootCoordinator()
         
         Self.setupServiceLocator(appSettings: appSettings)
-        
-        ServiceLocator.shared.analytics.isRunningPublisher
-            .removeDuplicates()
-            .sink { isRunning in
-                if isRunning {
-                    ServiceLocator.shared.bugReportService.start()
-                } else {
-                    ServiceLocator.shared.bugReportService.stop()
-                }
-            }
-            .store(in: &cancellables)
         
         ServiceLocator.shared.analytics.startIfEnabled()
 
@@ -144,16 +133,6 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
         observeAppLockChanges()
         
         registerBackgroundAppRefresh()
-        
-        elementCallService.actions.sink { [weak self] action in
-            switch action {
-            case .answerCall(let roomID):
-                self?.handleAppRoute(.call(roomID: roomID))
-            case .declineCall:
-                break
-            }
-        }
-        .store(in: &cancellables)
     }
     
     func start() {
@@ -246,20 +225,6 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
         return false
     }
     
-    func handleUserActivity(_ userActivity: NSUserActivity) {
-        // `INStartVideoCallIntent` is to be replaced with `INStartCallIntent`
-        // but calls from Recents still send it ¯\_(ツ)_/¯
-        guard let intent = userActivity.interaction?.intent as? INStartVideoCallIntent,
-              let contact = intent.contacts?.first,
-              let roomIdentifier = contact.personHandle?.value else {
-            MXLog.error("Failed retrieving information from userActivity: \(userActivity)")
-            return
-        }
-        
-        MXLog.info("Starting call in room: \(roomIdentifier)")
-        handleAppRoute(AppRoute.call(roomID: roomIdentifier))
-    }
-    
     // MARK: - AuthenticationFlowCoordinatorDelegate
     
     func authenticationFlowCoordinator(didLoginWithSession userSession: UserSessionProtocol) {
@@ -332,6 +297,10 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
     
     // MARK: - Private
     
+    private static func setupEnvironmentVariables() {
+        setenv("RUST_BACKTRACE", "1", 1)
+    }
+    
     private static func setupServiceLocator(appSettings: AppSettings) {
         ServiceLocator.shared.register(userIndicatorController: UserIndicatorController())
         ServiceLocator.shared.register(appSettings: appSettings)
@@ -342,9 +311,10 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
                                                                           sdkGitSHA: sdkGitSha(),
                                                                           maxUploadSize: appSettings.bugReportMaxUploadSize))
         let posthogAnalyticsClient = PostHogAnalyticsClient()
-        posthogAnalyticsClient.updateSuperProperties(AnalyticsEvent.SuperProperties(appPlatform: .EXI, cryptoSDK: .Rust, cryptoSDKVersion: sdkGitSha()))
+        posthogAnalyticsClient.updateSuperProperties(AnalyticsEvent.SuperProperties(appPlatform: nil, cryptoSDK: .Rust, cryptoSDKVersion: sdkGitSha()))
         ServiceLocator.shared.register(analytics: AnalyticsService(client: posthogAnalyticsClient,
-                                                                   appSettings: appSettings))
+                                                                   appSettings: appSettings,
+                                                                   bugReportService: ServiceLocator.shared.bugReportService))
     }
     
     /// Perform any required migrations for the app to function correctly.
@@ -448,16 +418,10 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
     }
     
     private func startAuthentication() {
-        let encryptionKeyProvider = EncryptionKeyProvider()
         let authenticationService = AuthenticationServiceProxy(userSessionStore: userSessionStore,
-                                                               encryptionKeyProvider: encryptionKeyProvider,
+                                                               encryptionKeyProvider: EncryptionKeyProvider(),
                                                                appSettings: appSettings)
-        let qrCodeLoginService = QRCodeLoginService(oidcConfiguration: appSettings.oidcConfiguration.rustValue,
-                                                    encryptionKeyProvider: encryptionKeyProvider,
-                                                    userSessionStore: userSessionStore)
-        
         authenticationFlowCoordinator = AuthenticationFlowCoordinator(authenticationService: authenticationService,
-                                                                      qrCodeLoginService: qrCodeLoginService,
                                                                       bugReportService: ServiceLocator.shared.bugReportService,
                                                                       navigationRootCoordinator: navigationRootCoordinator,
                                                                       appMediator: appMediator,
@@ -475,15 +439,15 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
         }
         
         Task {
-            let credentials = SoftLogoutScreenCredentials(userID: userSession.clientProxy.userID,
-                                                          homeserverName: userSession.clientProxy.homeserver,
+            let credentials = SoftLogoutScreenCredentials(userID: userSession.userID,
+                                                          homeserverName: userSession.homeserver,
                                                           userDisplayName: userSession.clientProxy.userDisplayNamePublisher.value ?? "",
-                                                          deviceID: userSession.clientProxy.deviceID)
+                                                          deviceID: userSession.deviceID)
             
             let authenticationService = AuthenticationServiceProxy(userSessionStore: userSessionStore,
                                                                    encryptionKeyProvider: EncryptionKeyProvider(),
                                                                    appSettings: appSettings)
-            _ = await authenticationService.configure(for: userSession.clientProxy.homeserver)
+            _ = await authenticationService.configure(for: userSession.homeserver)
             
             let parameters = SoftLogoutScreenCoordinatorParameters(authenticationService: authenticationService,
                                                                    credentials: credentials,
@@ -520,7 +484,6 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
                                                                     navigationRootCoordinator: navigationRootCoordinator,
                                                                     appLockService: appLockFlowCoordinator.appLockService,
                                                                     bugReportService: ServiceLocator.shared.bugReportService,
-                                                                    elementCallService: elementCallService,
                                                                     roomTimelineControllerFactory: RoomTimelineControllerFactory(),
                                                                     appMediator: appMediator,
                                                                     appSettings: appSettings,
@@ -715,7 +678,7 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
         stopSync()
         userSessionFlowCoordinator?.stop()
         
-        let userID = userSession.clientProxy.userID
+        let userID = userSession.userID
         tearDownUserSession()
     
         // Allow for everything to deallocate properly

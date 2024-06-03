@@ -180,7 +180,7 @@ class RoomScreenViewModel: RoomScreenViewModelType, RoomScreenViewModelProtocol 
             displayReadReceipts(for: itemID)
         case .displayCall:
             actionsSubject.send(.displayCallScreen)
-            analyticsService.trackInteraction(name: .MobileRoomCallButton)
+            
         case .handlePasteOrDrop(let provider):
             roomScreenInteractionHandler.handlePasteOrDrop(provider)
         case .handlePollAction(let pollAction):
@@ -800,7 +800,7 @@ private extension RoomProxyProtocol {
 // MARK: - Mocks
 
 extension RoomScreenViewModel {
-    static let mock = RoomScreenViewModel(roomProxy: RoomProxyMock(.init(name: "Preview room")),
+    static let mock = RoomScreenViewModel(roomProxy: RoomProxyMock(with: .init(name: "Preview room")),
                                           focussedEventID: nil,
                                           timelineController: MockRoomTimelineController(),
                                           mediaProvider: MockMediaProvider(),

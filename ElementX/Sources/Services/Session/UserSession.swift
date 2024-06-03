@@ -23,6 +23,10 @@ class UserSession: UserSessionProtocol {
     private var cancellables = Set<AnyCancellable>()
     
     private var authErrorCancellable: AnyCancellable?
+    
+    var userID: String { clientProxy.userID }
+    var deviceID: String? { clientProxy.deviceID }
+    var homeserver: String { clientProxy.homeserver }
 
     let clientProxy: ClientProxyProtocol
     let mediaProvider: MediaProviderProtocol

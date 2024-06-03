@@ -33,8 +33,6 @@ protocol AppMediatorProtocol {
     func openAppSettings()
     
     func setIdleTimerDisabled(_ disabled: Bool)
-    
-    func requestAuthorizationIfNeeded() async -> Bool
 }
 
 extension UIApplication.State: CustomStringConvertible {

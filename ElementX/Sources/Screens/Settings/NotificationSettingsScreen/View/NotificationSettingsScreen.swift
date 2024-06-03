@@ -222,7 +222,9 @@ struct NotificationSettingsScreen_Previews: PreviewProvider, TestablePreview {
         notificationSettingsProxy.isRoomMentionEnabledReturnValue = true
         notificationSettingsProxy.isCallEnabledReturnValue = false
 
-        let userSession = UserSessionMock(.init(clientProxy: ClientProxyMock(.init(userID: "John Doe"))))
+        let userSession = MockUserSession(clientProxy: ClientProxyMock(.init(userID: "John Doe")),
+                                          mediaProvider: MockMediaProvider(),
+                                          voiceMessageMediaManager: VoiceMessageMediaManagerMock())
 
         var viewModel = NotificationSettingsScreenViewModel(appSettings: appSettings,
                                                             userNotificationCenter: notificationCenter,
@@ -250,7 +252,9 @@ struct NotificationSettingsScreen_Previews: PreviewProvider, TestablePreview {
         notificationSettingsProxy.isRoomMentionEnabledReturnValue = true
         notificationSettingsProxy.isCallEnabledReturnValue = false
         
-        let userSession = UserSessionMock(.init(clientProxy: ClientProxyMock(.init(userID: "John Doe"))))
+        let userSession = MockUserSession(clientProxy: ClientProxyMock(.init(userID: "John Doe")),
+                                          mediaProvider: MockMediaProvider(),
+                                          voiceMessageMediaManager: VoiceMessageMediaManagerMock())
 
         var viewModel = NotificationSettingsScreenViewModel(appSettings: appSettings,
                                                             userNotificationCenter: notificationCenter,

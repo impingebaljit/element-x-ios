@@ -71,23 +71,23 @@ struct IdentityConfirmationScreen: View {
     @ViewBuilder
     private var actionButtons: some View {
         VStack(spacing: 32) {
-            if context.viewState.availableActions.contains(.interactiveVerification) {
+            switch context.viewState.mode {
+            case .recoveryOnly:
+                Button(L10n.screenSessionVerificationEnterRecoveryKey) {
+                    context.send(viewAction: .recoveryKey)
+                }
+                .buttonStyle(.compound(.primary))
+                
+            case .recoveryAndVerification:
                 Button(L10n.actionStartVerification) {
                     context.send(viewAction: .otherDevice)
                 }
                 .buttonStyle(.compound(.primary))
                 
-                if context.viewState.availableActions.contains(.recovery) {
-                    Button(L10n.screenSessionVerificationEnterRecoveryKey) {
-                        context.send(viewAction: .recoveryKey)
-                    }
-                    .buttonStyle(.compound(.plain))
-                }
-            } else if context.viewState.availableActions.contains(.recovery) {
                 Button(L10n.screenSessionVerificationEnterRecoveryKey) {
                     context.send(viewAction: .recoveryKey)
                 }
-                .buttonStyle(.compound(.primary))
+                .buttonStyle(.compound(.plain))
             }
             
             if shouldShowSkipButton {
@@ -96,11 +96,6 @@ struct IdentityConfirmationScreen: View {
                 }
                 .buttonStyle(.compound(.plain))
             }
-            
-            Button(L10n.screenRecoveryKeyConfirmLostRecoveryKey, role: .destructive) {
-                context.send(viewAction: .reset)
-            }
-            .buttonStyle(.compound(.plain))
         }
     }
 }
@@ -115,8 +110,10 @@ struct IdentityConfirmationScreen_Previews: PreviewProvider, TestablePreview {
     }
     
     private static var viewModel: IdentityConfirmationScreenViewModel {
-        let userSession = UserSessionMock(.init(clientProxy: ClientProxyMock(.init(userID: "@user:example.com",
-                                                                                   roomSummaryProvider: RoomSummaryProviderMock(.init(state: .loaded([])))))))
+        let userSession = MockUserSession(clientProxy: ClientProxyMock(.init(userID: "@user:example.com",
+                                                                             roomSummaryProvider: RoomSummaryProviderMock(.init(state: .loaded([]))))),
+                                          mediaProvider: MockMediaProvider(),
+                                          voiceMessageMediaManager: VoiceMessageMediaManagerMock())
         
         return IdentityConfirmationScreenViewModel(userSession: userSession,
                                                    appSettings: ServiceLocator.shared.settings,

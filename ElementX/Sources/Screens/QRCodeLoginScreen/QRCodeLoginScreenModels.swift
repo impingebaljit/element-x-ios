@@ -18,8 +18,6 @@ import Foundation
 
 enum QRCodeLoginScreenViewModelAction {
     case cancel
-    case signInManually
-    case done(userSession: UserSessionProtocol)
 }
 
 struct QRCodeLoginScreenViewState: BindableState {
@@ -46,18 +44,11 @@ struct QRCodeLoginScreenViewState: BindableState {
         AttributedString(L10n.screenQrCodeLoginConnectionNoteSecureStateListItem2),
         AttributedString(L10n.screenQrCodeLoginConnectionNoteSecureStateListItem3)
     ]
-    
-    var bindings = QRCodeLoginScreenViewStateBindings()
-}
-
-struct QRCodeLoginScreenViewStateBindings {
-    var qrResult: Data?
 }
 
 enum QRCodeLoginScreenViewAction {
     case cancel
     case startScan
-    case signInManually
     case openSettings
 }
 
@@ -74,11 +65,6 @@ enum QRCodeLoginState: Equatable {
     enum QRCodeLoginErrorState: Equatable {
         case noCameraPermission
         case connectionNotSecure
-        case cancelled
-        case declined
-        case expired
-        case linkingNotSupported
-        case deviceNotSupported
         case unknown
     }
     
@@ -89,8 +75,6 @@ enum QRCodeLoginState: Equatable {
         case connecting
         /// the qr code has been processed and is invalid
         case invalid
-        /// the qr code has been processed but it belongs to a device not signed in,
-        case deviceNotSignedIn
     }
     
     enum QRCodeLoginDisplayCodeState: Equatable {
@@ -111,44 +95,6 @@ enum QRCodeLoginState: Equatable {
         switch self {
         case .displayCode:
             return true
-        default:
-            return false
-        }
-    }
-    
-    var isScanning: Bool {
-        switch self {
-        case .scan(let state):
-            return state == .scanning
-        default:
-            return false
-        }
-    }
-    
-    var isError: Bool {
-        switch self {
-        case .error:
-            return true
-        case let .scan(state):
-            switch state {
-            case .invalid, .deviceNotSignedIn:
-                return true
-            default:
-                return false
-            }
-        default:
-            return false
-        }
-    }
-    
-    var shouldDisplayCancelButton: Bool {
-        switch self {
-        case .initial:
-            return true
-        case .scan:
-            return true
-        case .error(let error):
-            return error == .noCameraPermission
         default:
             return false
         }

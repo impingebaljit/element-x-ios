@@ -66,7 +66,6 @@ enum RoomTimelineItemType: Equatable {
     case poll(PollRoomTimelineItem)
     case voice(VoiceMessageRoomTimelineItem)
     case callInvite(CallInviteRoomTimelineItem)
-    case callNotification(CallNotificationRoomTimelineItem)
 
     init(item: RoomTimelineItemProtocol) {
         switch item {
@@ -112,8 +111,6 @@ enum RoomTimelineItemType: Equatable {
             self = .voice(item)
         case let item as CallInviteRoomTimelineItem:
             self = .callInvite(item)
-        case let item as CallNotificationRoomTimelineItem:
-            self = .callNotification(item)
         default:
             fatalError("Unknown timeline item")
         }
@@ -141,8 +138,7 @@ enum RoomTimelineItemType: Equatable {
              .location(let item as RoomTimelineItemProtocol),
              .poll(let item as RoomTimelineItemProtocol),
              .voice(let item as RoomTimelineItemProtocol),
-             .callInvite(let item as RoomTimelineItemProtocol),
-             .callNotification(let item as RoomTimelineItemProtocol):
+             .callInvite(let item as RoomTimelineItemProtocol):
             return item.id
         }
     }

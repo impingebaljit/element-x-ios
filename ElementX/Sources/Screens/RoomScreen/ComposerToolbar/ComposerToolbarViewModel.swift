@@ -27,7 +27,6 @@ final class ComposerToolbarViewModel: ComposerToolbarViewModelType, ComposerTool
     private let wysiwygViewModel: WysiwygComposerViewModel
     private let completionSuggestionService: CompletionSuggestionServiceProtocol
     private let appSettings: AppSettings
-    private let analyticsService: AnalyticsService
     
     private let mentionBuilder: MentionBuilderProtocol
     private let attributedStringBuilder: AttributedStringBuilderProtocol
@@ -48,16 +47,10 @@ final class ComposerToolbarViewModel: ComposerToolbarViewModelType, ComposerTool
 
     private var currentLinkData: WysiwygLinkData?
 
-    init(wysiwygViewModel: WysiwygComposerViewModel,
-         completionSuggestionService: CompletionSuggestionServiceProtocol,
-         mediaProvider: MediaProviderProtocol,
-         appSettings: AppSettings,
-         mentionDisplayHelper: MentionDisplayHelper,
-         analyticsService: AnalyticsService) {
+    init(wysiwygViewModel: WysiwygComposerViewModel, completionSuggestionService: CompletionSuggestionServiceProtocol, mediaProvider: MediaProviderProtocol, appSettings: AppSettings, mentionDisplayHelper: MentionDisplayHelper) {
         self.wysiwygViewModel = wysiwygViewModel
         self.completionSuggestionService = completionSuggestionService
         self.appSettings = appSettings
-        self.analyticsService = analyticsService
         
         mentionBuilder = MentionBuilder()
         attributedStringBuilder = AttributedStringBuilder(cacheKey: "Composer", mentionBuilder: mentionBuilder)
@@ -87,14 +80,6 @@ final class ComposerToolbarViewModel: ComposerToolbarViewModelType, ComposerTool
             .sink { [weak self] isEmpty in
                 self?.state.composerEmpty = isEmpty
                 self?.actionsSubject.send(.contentChanged(isEmpty: isEmpty))
-            }
-            .store(in: &cancellables)
-        
-        context.$viewState
-            .map(\.bindings.plainComposerText)
-            .removeDuplicates()
-            .sink { [weak self] plainComposerText in
-                self?.actionsSubject.send(.contentChanged(isEmpty: plainComposerText.string.isEmpty))
             }
             .store(in: &cancellables)
 
@@ -164,8 +149,6 @@ final class ComposerToolbarViewModel: ComposerToolbarViewModelType, ComposerTool
         case .enableTextFormatting:
             state.bindings.composerFormattingEnabled = true
             state.bindings.composerFocused = true
-            
-            analyticsService.trackInteraction(name: .MobileRoomComposerFormattingEnabled)
         case .composerAction(let action):
             if action == .link {
                 createLinkAlert()

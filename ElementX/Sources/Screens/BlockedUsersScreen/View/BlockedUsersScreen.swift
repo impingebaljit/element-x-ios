@@ -40,21 +40,21 @@ struct BlockedUsersScreen: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
             Form {
-                ForEach(context.viewState.blockedUsers, id: \.self) { user in
-                    ListRow(label: .avatar(title: user.displayName ?? user.userID, icon: avatar(for: user)),
-                            details: .isWaiting(context.viewState.processingUserID == user.userID),
-                            kind: .button(action: { context.send(viewAction: .unblockUser(user)) }))
+                ForEach(context.viewState.blockedUsers, id: \.self) { userID in
+                    ListRow(label: .avatar(title: userID, icon: avatar(for: userID)),
+                            details: .isWaiting(context.viewState.processingUserID == userID),
+                            kind: .button(action: { context.send(viewAction: .unblockUser(userID: userID)) }))
                 }
             }
         }
     }
     
-    private func avatar(for user: UserProfileProxy) -> some View {
-        LoadableAvatarImage(url: user.avatarURL,
-                            name: user.displayName,
-                            contentID: user.userID,
+    private func avatar(for userID: String) -> some View {
+        LoadableAvatarImage(url: nil,
+                            name: String(userID.dropFirst()),
+                            contentID: userID,
                             avatarSize: .user(on: .blockedUsers),
-                            imageProvider: context.imageProvider)
+                            imageProvider: nil)
             .accessibilityHidden(true)
     }
 }
@@ -62,9 +62,7 @@ struct BlockedUsersScreen: View {
 // MARK: - Previews
 
 struct BlockedUsersScreen_Previews: PreviewProvider, TestablePreview {
-    static let viewModel = BlockedUsersScreenViewModel(hideProfiles: true,
-                                                       clientProxy: ClientProxyMock(.init(userID: RoomMemberProxyMock.mockMe.userID)),
-                                                       mediaProvider: MockMediaProvider(),
+    static let viewModel = BlockedUsersScreenViewModel(clientProxy: ClientProxyMock(.init(userID: RoomMemberProxyMock.mockMe.userID)),
                                                        userIndicatorController: UserIndicatorControllerMock())
     
     static var previews: some View {

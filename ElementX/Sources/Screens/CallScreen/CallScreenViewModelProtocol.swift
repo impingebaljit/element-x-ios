@@ -20,6 +20,4 @@ import Combine
 protocol CallScreenViewModelProtocol {
     var actions: AnyPublisher<CallScreenViewModelAction, Never> { get }
     var context: CallScreenViewModelType.Context { get }
-    
-    func stop()
 }

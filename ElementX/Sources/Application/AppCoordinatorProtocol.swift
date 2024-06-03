@@ -18,8 +18,5 @@ import Foundation
 
 protocol AppCoordinatorProtocol: CoordinatorProtocol {
     var windowManager: SecureWindowManagerProtocol { get }
-    
     @discardableResult func handleDeepLink(_ url: URL, isExternalURL: Bool) -> Bool
-    
-    func handleUserActivity(_ userActivity: NSUserActivity)
 }

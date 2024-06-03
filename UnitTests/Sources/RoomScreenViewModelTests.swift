@@ -333,7 +333,7 @@ class RoomScreenViewModelTests: XCTestCase {
                                                                                        MockRoomTimelineController,
                                                                                        NotificationCenterMock) {
         let notificationCenter = NotificationCenterMock()
-        let roomProxy = RoomProxyMock(.init(name: ""))
+        let roomProxy = RoomProxyMock(with: .init(name: ""))
         
         let timelineProxy = TimelineProxyMock()
         timelineProxy.underlyingActions = Empty(completeImmediately: false).eraseToAnyPublisher()
@@ -371,7 +371,8 @@ class RoomScreenViewModelTests: XCTestCase {
         // When showing them in a timeline.
         let timelineController = MockRoomTimelineController()
         timelineController.timelineItems = [message]
-        let viewModel = RoomScreenViewModel(roomProxy: RoomProxyMock(.init(name: "", members: [RoomMemberProxyMock.mockAlice, RoomMemberProxyMock.mockCharlie])),
+        let viewModel = RoomScreenViewModel(roomProxy: RoomProxyMock(with: .init(name: "",
+                                                                                 members: [RoomMemberProxyMock.mockAlice, RoomMemberProxyMock.mockCharlie])),
                                             timelineController: timelineController,
                                             mediaProvider: MockMediaProvider(),
                                             mediaPlayerProvider: MediaPlayerProviderMock(),
@@ -395,7 +396,7 @@ class RoomScreenViewModelTests: XCTestCase {
     private func makeViewModel(roomProxy: RoomProxyProtocol? = nil,
                                focussedEventID: String? = nil,
                                timelineController: RoomTimelineControllerProtocol) -> RoomScreenViewModel {
-        RoomScreenViewModel(roomProxy: roomProxy ?? RoomProxyMock(.init(name: "")),
+        RoomScreenViewModel(roomProxy: roomProxy ?? RoomProxyMock(with: .init(name: "")),
                             focussedEventID: focussedEventID,
                             timelineController: timelineController,
                             mediaProvider: MockMediaProvider(),

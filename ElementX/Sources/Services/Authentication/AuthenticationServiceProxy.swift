@@ -32,13 +32,22 @@ class AuthenticationServiceProxy: AuthenticationServiceProxyProtocol {
         
         homeserverSubject = .init(LoginHomeserver(address: appSettings.defaultHomeserverAddress,
                                                   loginMode: .unknown))
+        
+        let oidcConfiguration = OidcConfiguration(clientName: InfoPlistReader.main.bundleDisplayName,
+                                                  redirectUri: appSettings.oidcRedirectURL.absoluteString,
+                                                  clientUri: appSettings.websiteURL.absoluteString,
+                                                  logoUri: appSettings.logoURL.absoluteString,
+                                                  tosUri: appSettings.acceptableUseURL.absoluteString,
+                                                  policyUri: appSettings.privacyURL.absoluteString,
+                                                  contacts: [appSettings.supportEmailAddress],
+                                                  staticRegistrations: appSettings.oidcStaticRegistrations.mapKeys { $0.absoluteString })
                
         authenticationService = AuthenticationService(basePath: userSessionStore.baseDirectory.path,
                                                       passphrase: passphrase,
                                                       userAgent: UserAgentBuilder.makeASCIIUserAgent(),
                                                       additionalRootCertificates: [],
                                                       proxy: appSettings.websiteURL.globalProxy,
-                                                      oidcConfiguration: appSettings.oidcConfiguration.rustValue,
+                                                      oidcConfiguration: oidcConfiguration,
                                                       customSlidingSyncProxy: appSettings.slidingSyncProxyURL?.absoluteString,
                                                       sessionDelegate: userSessionStore.clientSessionDelegate,
                                                       crossProcessRefreshLockId: InfoPlistReader.main.bundleIdentifier)

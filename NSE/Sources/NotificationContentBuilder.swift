@@ -46,8 +46,6 @@ struct NotificationContentBuilder {
                     return try await processPollStartEvent(notificationItem: notificationItem, pollQuestion: question, mediaProvider: mediaProvider)
                 case .callInvite:
                     return try await processCallInviteEvent(notificationItem: notificationItem, mediaProvider: mediaProvider)
-                case .callNotify:
-                    return try await processCallNotifyEvent(notificationItem: notificationItem, mediaProvider: mediaProvider)
                 default:
                     return processEmpty(notificationItem: notificationItem)
                 }
@@ -136,12 +134,6 @@ struct NotificationContentBuilder {
     private func processCallInviteEvent(notificationItem: NotificationItemProxyProtocol, mediaProvider: MediaProviderProtocol?) async throws -> UNMutableNotificationContent {
         let notification = try await processCommonRoomMessage(notificationItem: notificationItem, mediaProvider: mediaProvider)
         notification.body = L10n.commonCallInvite
-        return notification
-    }
-    
-    private func processCallNotifyEvent(notificationItem: NotificationItemProxyProtocol, mediaProvider: MediaProviderProtocol?) async throws -> UNMutableNotificationContent {
-        let notification = try await processCommonRoomMessage(notificationItem: notificationItem, mediaProvider: mediaProvider)
-        notification.body = L10n.commonCallStarted
         return notification
     }
 

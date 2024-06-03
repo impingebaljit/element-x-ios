@@ -62,6 +62,8 @@ protocol BugReportServiceProtocol {
            
     func stop()
     
+    func reset()
+    
     func submitBugReport(_ bugReport: BugReport,
                          progressListener: CurrentValueSubject<Double, Never>) async -> Result<SubmitBugReportResponse, BugReportServiceError>
 }

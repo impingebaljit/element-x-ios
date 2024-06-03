@@ -175,7 +175,9 @@ struct CreateRoomScreen: View {
 
 struct CreateRoom_Previews: PreviewProvider, TestablePreview {
     static let viewModel = {
-        let userSession = UserSessionMock(.init(clientProxy: ClientProxyMock(.init(userID: "@userid:example.com"))))
+        let userSession = MockUserSession(clientProxy: ClientProxyMock(.init(userID: "@userid:example.com")),
+                                          mediaProvider: MockMediaProvider(),
+                                          voiceMessageMediaManager: VoiceMessageMediaManagerMock())
         let parameters = CreateRoomFlowParameters()
         let selectedUsers: [UserProfileProxy] = [.mockAlice, .mockBob, .mockCharlie]
         
@@ -187,7 +189,9 @@ struct CreateRoom_Previews: PreviewProvider, TestablePreview {
     }()
     
     static let emtpyViewModel = {
-        let userSession = UserSessionMock(.init(clientProxy: ClientProxyMock(.init(userID: "@userid:example.com"))))
+        let userSession = MockUserSession(clientProxy: ClientProxyMock(.init(userID: "@userid:example.com")),
+                                          mediaProvider: MockMediaProvider(),
+                                          voiceMessageMediaManager: VoiceMessageMediaManagerMock())
         let parameters = CreateRoomFlowParameters()
         return CreateRoomViewModel(userSession: userSession,
                                    createRoomParameters: .init(parameters),

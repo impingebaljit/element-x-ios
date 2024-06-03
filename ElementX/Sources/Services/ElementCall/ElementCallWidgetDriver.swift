@@ -41,7 +41,6 @@ class ElementCallWidgetDriver: WidgetCapabilitiesProvider, ElementCallWidgetDriv
     private let room: RoomProtocol
     private var widgetDriver: WidgetDriverAndHandle?
     
-    let widgetID = UUID().uuidString
     let messagePublisher = PassthroughSubject<String, Never>()
     
     private let actionsSubject: PassthroughSubject<ElementCallWidgetDriverAction, Never> = .init()
@@ -61,7 +60,7 @@ class ElementCallWidgetDriver: WidgetCapabilitiesProvider, ElementCallWidgetDriv
         let useEncryption = (try? room.isEncrypted()) ?? false
         
         guard let widgetSettings = try? newVirtualElementCallWidget(props: .init(elementCallUrl: baseURL.absoluteString,
-                                                                                 widgetId: widgetID,
+                                                                                 widgetId: UUID().uuidString,
                                                                                  parentUrl: nil,
                                                                                  hideHeader: nil,
                                                                                  preload: nil,
@@ -140,7 +139,7 @@ class ElementCallWidgetDriver: WidgetCapabilitiesProvider, ElementCallWidgetDriv
     // MARK: - WidgetCapabilitiesProvider
     
     func acquireCapabilities(capabilities: WidgetCapabilities) -> WidgetCapabilities {
-        getElementCallRequiredPermissions(ownUserId: room.ownUserId())
+        capabilities
     }
     
     // MARK: - Private

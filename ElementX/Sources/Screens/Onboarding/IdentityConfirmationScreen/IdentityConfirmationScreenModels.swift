@@ -21,16 +21,15 @@ enum IdentityConfirmationScreenViewModelAction {
     case recoveryKey
     /// Only possible in debug builds.
     case skip
-    case reset
 }
 
 struct IdentityConfirmationScreenViewState: BindableState {
-    enum AvailableActions {
-        case recovery
-        case interactiveVerification
+    enum Mode {
+        case recoveryOnly
+        case recoveryAndVerification
     }
     
-    var availableActions: [AvailableActions] = []
+    var mode = Mode.recoveryOnly
     let learnMoreURL: URL
 }
 
@@ -39,5 +38,4 @@ enum IdentityConfirmationScreenViewAction {
     case recoveryKey
     /// Only possible in debug builds.
     case skip
-    case reset
 }

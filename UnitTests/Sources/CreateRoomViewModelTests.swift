@@ -23,7 +23,7 @@ import XCTest
 class CreateRoomScreenViewModelTests: XCTestCase {
     var viewModel: CreateRoomViewModelProtocol!
     var clientProxy: ClientProxyMock!
-    var userSession: UserSessionMock!
+    var userSession: MockUserSession!
     
     private let usersSubject = CurrentValueSubject<[UserProfileProxy], Never>([])
     private var cancellables = Set<AnyCancellable>()
@@ -35,7 +35,9 @@ class CreateRoomScreenViewModelTests: XCTestCase {
     override func setUpWithError() throws {
         cancellables.removeAll()
         clientProxy = ClientProxyMock(.init(userID: "@a:b.com"))
-        userSession = UserSessionMock(.init(clientProxy: clientProxy))
+        userSession = MockUserSession(clientProxy: clientProxy,
+                                      mediaProvider: MockMediaProvider(),
+                                      voiceMessageMediaManager: VoiceMessageMediaManagerMock())
         let parameters = CreateRoomFlowParameters()
         usersSubject.send([.mockAlice, .mockBob, .mockCharlie])
         let viewModel = CreateRoomViewModel(userSession: userSession,

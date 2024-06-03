@@ -31,7 +31,6 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
     private let appSettings: AppSettings
     private let analytics: AnalyticsService
     private let userIndicatorController: UserIndicatorControllerProtocol
-    private let qrCodeLoginService: QRCodeLoginServiceProtocol
     
     private var cancellables = Set<AnyCancellable>()
     
@@ -43,7 +42,6 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
     weak var delegate: AuthenticationFlowCoordinatorDelegate?
     
     init(authenticationService: AuthenticationServiceProxyProtocol,
-         qrCodeLoginService: QRCodeLoginServiceProtocol,
          bugReportService: BugReportServiceProtocol,
          navigationRootCoordinator: NavigationRootCoordinator,
          appMediator: AppMediatorProtocol,
@@ -57,7 +55,6 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
         self.appSettings = appSettings
         self.analytics = analytics
         self.userIndicatorController = userIndicatorController
-        self.qrCodeLoginService = qrCodeLoginService
         
         navigationStackCoordinator = NavigationStackCoordinator()
     }
@@ -109,7 +106,7 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
     }
     
     private func startQRCodeLogin() {
-        let coordinator = QRCodeLoginScreenCoordinator(parameters: .init(qrCodeLoginService: qrCodeLoginService,
+        let coordinator = QRCodeLoginScreenCoordinator(parameters: .init(qrCodeLoginService: QRCodeLoginService(),
                                                                          orientationManager: appMediator.windowManager,
                                                                          appMediator: appMediator))
         coordinator.actionsPublisher.sink { [weak self] action in
@@ -117,18 +114,8 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
                 return
             }
             switch action {
-            case .signInManually:
-                navigationStackCoordinator.setSheetCoordinator(nil)
-                Task { await self.startAuthentication() }
             case .cancel:
                 navigationStackCoordinator.setSheetCoordinator(nil)
-            case .done(let userSession):
-                navigationStackCoordinator.setSheetCoordinator(nil)
-                // Since the qr code login flow includes verification
-                appSettings.hasRunIdentityConfirmationOnboarding = true
-                DispatchQueue.main.async {
-                    self.userHasSignedIn(userSession: userSession)
-                }
             }
         }
         .store(in: &cancellables)

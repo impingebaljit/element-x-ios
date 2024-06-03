@@ -37,8 +37,7 @@ class ComposerToolbarViewModelTests: XCTestCase {
                                              completionSuggestionService: completionSuggestionServiceMock,
                                              mediaProvider: MockMediaProvider(),
                                              appSettings: appSettings,
-                                             mentionDisplayHelper: ComposerMentionDisplayHelper.mock,
-                                             analyticsService: ServiceLocator.shared.analytics)
+                                             mentionDisplayHelper: ComposerMentionDisplayHelper.mock)
         
         viewModel.context.composerFormattingEnabled = true
     }
@@ -114,8 +113,7 @@ class ComposerToolbarViewModelTests: XCTestCase {
                                              completionSuggestionService: mockCompletionSuggestionService,
                                              mediaProvider: MockMediaProvider(),
                                              appSettings: ServiceLocator.shared.settings,
-                                             mentionDisplayHelper: ComposerMentionDisplayHelper.mock,
-                                             analyticsService: ServiceLocator.shared.analytics)
+                                             mentionDisplayHelper: ComposerMentionDisplayHelper.mock)
         
         XCTAssertEqual(viewModel.state.suggestions, suggestions)
     }

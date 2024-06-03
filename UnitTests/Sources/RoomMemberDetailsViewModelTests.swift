@@ -26,7 +26,7 @@ class RoomMemberDetailsViewModelTests: XCTestCase {
     var context: RoomMemberDetailsScreenViewModelType.Context { viewModel.context }
 
     override func setUp() async throws {
-        roomProxyMock = RoomProxyMock(.init(name: ""))
+        roomProxyMock = RoomProxyMock(with: .init(name: ""))
         
         roomProxyMock.getMemberUserIDClosure = { _ in
             .success(self.roomMemberProxyMock)

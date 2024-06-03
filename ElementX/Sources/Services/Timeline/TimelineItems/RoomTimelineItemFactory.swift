@@ -75,8 +75,6 @@ struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
             return buildPollTimelineItem(question, kind, maxSelections, answers, votes, endTime, eventItemProxy, isOutgoing, edited)
         case .callInvite:
             return buildCallInviteTimelineItem(for: eventItemProxy)
-        case .callNotify:
-            return buildCallNotificationTimelineItem(for: eventItemProxy)
         }
     }
     
@@ -438,14 +436,6 @@ struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
                                    isEditable: eventItemProxy.isEditable,
                                    canBeRepliedTo: eventItemProxy.canBeRepliedTo,
                                    sender: eventItemProxy.sender)
-    }
-    
-    private func buildCallNotificationTimelineItem(for eventItemProxy: EventTimelineItemProxy) -> RoomTimelineItemProtocol {
-        CallNotificationRoomTimelineItem(id: eventItemProxy.id,
-                                         timestamp: eventItemProxy.timestamp.formatted(date: .omitted, time: .shortened),
-                                         isEditable: eventItemProxy.isEditable,
-                                         canBeRepliedTo: eventItemProxy.canBeRepliedTo,
-                                         sender: eventItemProxy.sender)
     }
     
     private func aggregateReactions(_ reactions: [Reaction]) -> [AggregatedReaction] {

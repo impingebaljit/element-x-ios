@@ -28,7 +28,7 @@ class RoomChangePermissionsScreenViewModelTests: XCTestCase {
     }
     
     override func setUp() {
-        roomProxy = RoomProxyMock(.init())
+        roomProxy = RoomProxyMock(with: .init())
         viewModel = RoomChangePermissionsScreenViewModel(currentPermissions: .init(powerLevels: .mock),
                                                          group: .roomDetails,
                                                          roomProxy: roomProxy,

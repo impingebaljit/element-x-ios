@@ -15,7 +15,6 @@
 //
 
 import AnalyticsEvents
-import Combine
 import PostHog
 
 /// A class responsible for managing a variety of analytics clients
@@ -35,23 +34,20 @@ class AnalyticsService {
     /// The analytics client to send events with.
     private let client: AnalyticsClientProtocol
     private let appSettings: AppSettings
+    private let bugReportService: BugReportServiceProtocol
     
     /// A signpost client for performance testing the app. This client doesn't respect the
     /// `isRunning` state or behave any differently when `start`/`reset` are called.
     let signpost = Signposter()
-    
-    /// Whether or not the object is enabled and sending events to the server.
-    private let isRunningSubject: CurrentValueSubject<Bool, Never> = .init(false)
-    var isRunningPublisher: CurrentValuePublisher<Bool, Never> {
-        isRunningSubject.asCurrentValuePublisher()
-    }
 
-    init(client: AnalyticsClientProtocol, appSettings: AppSettings) {
+    init(client: AnalyticsClientProtocol, appSettings: AppSettings, bugReportService: BugReportServiceProtocol) {
         self.client = client
         self.appSettings = appSettings
-        
-        isRunningSubject.send(client.isRunning)
+        self.bugReportService = bugReportService
     }
+        
+    /// Whether or not the object is enabled and sending events to the server.
+    var isRunning: Bool { client.isRunning }
     
     /// Whether to show the user the analytics opt in prompt.
     var shouldShowAnalyticsPrompt: Bool {
@@ -76,21 +72,20 @@ class AnalyticsService {
         // The order is important here. PostHog ignores the reset if stopped.
         reset()
         client.stop()
-        
-        isRunningSubject.send(false)
+        bugReportService.stop()
         MXLog.info("Stopped.")
     }
     
     /// Starts the analytics client if the user has opted in, otherwise does nothing.
     func startIfEnabled() {
-        guard isEnabled, !isRunningPublisher.value else { return }
+        guard isEnabled, !isRunning else { return }
         
         client.start(analyticsConfiguration: appSettings.analyticsConfiguration)
+        bugReportService.start()
 
         // Sanity check in case something went wrong.
         guard client.isRunning else { return }
         
-        isRunningSubject.send(true)
         MXLog.info("Started.")
     }
     
@@ -100,6 +95,7 @@ class AnalyticsService {
     /// Note: **MUST** be called before stopping PostHog or the reset is ignored.
     func reset() {
         client.reset()
+        bugReportService.reset()
         MXLog.info("Reset.")
     }
     

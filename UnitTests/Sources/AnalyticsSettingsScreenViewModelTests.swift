@@ -34,7 +34,8 @@ class AnalyticsSettingsScreenViewModelTests: XCTestCase {
         let analyticsClient = AnalyticsClientMock()
         analyticsClient.isRunning = false
         ServiceLocator.shared.register(analytics: AnalyticsService(client: analyticsClient,
-                                                                   appSettings: appSettings))
+                                                                   appSettings: appSettings,
+                                                                   bugReportService: ServiceLocator.shared.bugReportService))
         
         viewModel = AnalyticsSettingsScreenViewModel(appSettings: appSettings,
                                                      analytics: ServiceLocator.shared.analytics)

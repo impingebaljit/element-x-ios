@@ -1014,70 +1014,6 @@ class AppMediatorMock: AppMediatorProtocol {
         setIdleTimerDisabledReceivedInvocations.append(disabled)
         setIdleTimerDisabledClosure?(disabled)
     }
-    //MARK: - requestAuthorizationIfNeeded
-
-    var requestAuthorizationIfNeededUnderlyingCallsCount = 0
-    var requestAuthorizationIfNeededCallsCount: Int {
-        get {
-            if Thread.isMainThread {
-                return requestAuthorizationIfNeededUnderlyingCallsCount
-            } else {
-                var returnValue: Int? = nil
-                DispatchQueue.main.sync {
-                    returnValue = requestAuthorizationIfNeededUnderlyingCallsCount
-                }
-
-                return returnValue!
-            }
-        }
-        set {
-            if Thread.isMainThread {
-                requestAuthorizationIfNeededUnderlyingCallsCount = newValue
-            } else {
-                DispatchQueue.main.sync {
-                    requestAuthorizationIfNeededUnderlyingCallsCount = newValue
-                }
-            }
-        }
-    }
-    var requestAuthorizationIfNeededCalled: Bool {
-        return requestAuthorizationIfNeededCallsCount > 0
-    }
-
-    var requestAuthorizationIfNeededUnderlyingReturnValue: Bool!
-    var requestAuthorizationIfNeededReturnValue: Bool! {
-        get {
-            if Thread.isMainThread {
-                return requestAuthorizationIfNeededUnderlyingReturnValue
-            } else {
-                var returnValue: Bool? = nil
-                DispatchQueue.main.sync {
-                    returnValue = requestAuthorizationIfNeededUnderlyingReturnValue
-                }
-
-                return returnValue!
-            }
-        }
-        set {
-            if Thread.isMainThread {
-                requestAuthorizationIfNeededUnderlyingReturnValue = newValue
-            } else {
-                DispatchQueue.main.sync {
-                    requestAuthorizationIfNeededUnderlyingReturnValue = newValue
-                }
-            }
-        }
-    }
-    var requestAuthorizationIfNeededClosure: (() async -> Bool)?
-
-    func requestAuthorizationIfNeeded() async -> Bool {
-        requestAuthorizationIfNeededCallsCount += 1
-        if let requestAuthorizationIfNeededClosure = requestAuthorizationIfNeededClosure {
-            return await requestAuthorizationIfNeededClosure()
-        } else {
-            return requestAuthorizationIfNeededReturnValue
-        }
-    }
 }
 class AudioConverterMock: AudioConverterProtocol {
 
@@ -1855,6 +1791,41 @@ class BugReportServiceMock: BugReportServiceProtocol {
     func stop() {
         stopCallsCount += 1
         stopClosure?()
+    }
+    //MARK: - reset
+
+    var resetUnderlyingCallsCount = 0
+    var resetCallsCount: Int {
+        get {
+            if Thread.isMainThread {
+                return resetUnderlyingCallsCount
+            } else {
+                var returnValue: Int? = nil
+                DispatchQueue.main.sync {
+                    returnValue = resetUnderlyingCallsCount
+                }
+
+                return returnValue!
+            }
+        }
+        set {
+            if Thread.isMainThread {
+                resetUnderlyingCallsCount = newValue
+            } else {
+                DispatchQueue.main.sync {
+                    resetUnderlyingCallsCount = newValue
+                }
+            }
+        }
+    }
+    var resetCalled: Bool {
+        return resetCallsCount > 0
+    }
+    var resetClosure: (() -> Void)?
+
+    func reset() {
+        resetCallsCount += 1
+        resetClosure?()
     }
     //MARK: - submitBugReport
 
@@ -4259,94 +4230,7 @@ class CompletionSuggestionServiceMock: CompletionSuggestionServiceProtocol {
         setSuggestionTriggerClosure?(suggestionTrigger)
     }
 }
-class ElementCallServiceMock: ElementCallServiceProtocol {
-    var actions: AnyPublisher<ElementCallServiceAction, Never> {
-        get { return underlyingActions }
-        set(value) { underlyingActions = value }
-    }
-    var underlyingActions: AnyPublisher<ElementCallServiceAction, Never>!
-
-    //MARK: - setupCallSession
-
-    var setupCallSessionTitleUnderlyingCallsCount = 0
-    var setupCallSessionTitleCallsCount: Int {
-        get {
-            if Thread.isMainThread {
-                return setupCallSessionTitleUnderlyingCallsCount
-            } else {
-                var returnValue: Int? = nil
-                DispatchQueue.main.sync {
-                    returnValue = setupCallSessionTitleUnderlyingCallsCount
-                }
-
-                return returnValue!
-            }
-        }
-        set {
-            if Thread.isMainThread {
-                setupCallSessionTitleUnderlyingCallsCount = newValue
-            } else {
-                DispatchQueue.main.sync {
-                    setupCallSessionTitleUnderlyingCallsCount = newValue
-                }
-            }
-        }
-    }
-    var setupCallSessionTitleCalled: Bool {
-        return setupCallSessionTitleCallsCount > 0
-    }
-    var setupCallSessionTitleReceivedTitle: String?
-    var setupCallSessionTitleReceivedInvocations: [String] = []
-    var setupCallSessionTitleClosure: ((String) async -> Void)?
-
-    func setupCallSession(title: String) async {
-        setupCallSessionTitleCallsCount += 1
-        setupCallSessionTitleReceivedTitle = title
-        setupCallSessionTitleReceivedInvocations.append(title)
-        await setupCallSessionTitleClosure?(title)
-    }
-    //MARK: - tearDownCallSession
-
-    var tearDownCallSessionUnderlyingCallsCount = 0
-    var tearDownCallSessionCallsCount: Int {
-        get {
-            if Thread.isMainThread {
-                return tearDownCallSessionUnderlyingCallsCount
-            } else {
-                var returnValue: Int? = nil
-                DispatchQueue.main.sync {
-                    returnValue = tearDownCallSessionUnderlyingCallsCount
-                }
-
-                return returnValue!
-            }
-        }
-        set {
-            if Thread.isMainThread {
-                tearDownCallSessionUnderlyingCallsCount = newValue
-            } else {
-                DispatchQueue.main.sync {
-                    tearDownCallSessionUnderlyingCallsCount = newValue
-                }
-            }
-        }
-    }
-    var tearDownCallSessionCalled: Bool {
-        return tearDownCallSessionCallsCount > 0
-    }
-    var tearDownCallSessionClosure: (() -> Void)?
-
-    func tearDownCallSession() {
-        tearDownCallSessionCallsCount += 1
-        tearDownCallSessionClosure?()
-    }
-}
 class ElementCallWidgetDriverMock: ElementCallWidgetDriverProtocol {
-    var widgetID: String {
-        get { return underlyingWidgetID }
-        set(value) { underlyingWidgetID = value }
-    }
-    var underlyingWidgetID: String!
     var messagePublisher: PassthroughSubject<String, Never> {
         get { return underlyingMessagePublisher }
         set(value) { underlyingMessagePublisher = value }
@@ -7232,23 +7116,18 @@ class PollInteractionHandlerMock: PollInteractionHandlerProtocol {
     }
 }
 class QRCodeLoginServiceMock: QRCodeLoginServiceProtocol {
-    var qrLoginProgressPublisher: AnyPublisher<QrLoginProgress, Never> {
-        get { return underlyingQrLoginProgressPublisher }
-        set(value) { underlyingQrLoginProgressPublisher = value }
-    }
-    var underlyingQrLoginProgressPublisher: AnyPublisher<QrLoginProgress, Never>!
 
-    //MARK: - loginWithQRCode
+    //MARK: - requestAuthorizationIfNeeded
 
-    var loginWithQRCodeDataUnderlyingCallsCount = 0
-    var loginWithQRCodeDataCallsCount: Int {
+    var requestAuthorizationIfNeededUnderlyingCallsCount = 0
+    var requestAuthorizationIfNeededCallsCount: Int {
         get {
             if Thread.isMainThread {
-                return loginWithQRCodeDataUnderlyingCallsCount
+                return requestAuthorizationIfNeededUnderlyingCallsCount
             } else {
                 var returnValue: Int? = nil
                 DispatchQueue.main.sync {
-                    returnValue = loginWithQRCodeDataUnderlyingCallsCount
+                    returnValue = requestAuthorizationIfNeededUnderlyingCallsCount
                 }
 
                 return returnValue!
@@ -7256,29 +7135,27 @@ class QRCodeLoginServiceMock: QRCodeLoginServiceProtocol {
         }
         set {
             if Thread.isMainThread {
-                loginWithQRCodeDataUnderlyingCallsCount = newValue
+                requestAuthorizationIfNeededUnderlyingCallsCount = newValue
             } else {
                 DispatchQueue.main.sync {
-                    loginWithQRCodeDataUnderlyingCallsCount = newValue
+                    requestAuthorizationIfNeededUnderlyingCallsCount = newValue
                 }
             }
         }
     }
-    var loginWithQRCodeDataCalled: Bool {
-        return loginWithQRCodeDataCallsCount > 0
+    var requestAuthorizationIfNeededCalled: Bool {
+        return requestAuthorizationIfNeededCallsCount > 0
     }
-    var loginWithQRCodeDataReceivedData: Data?
-    var loginWithQRCodeDataReceivedInvocations: [Data] = []
 
-    var loginWithQRCodeDataUnderlyingReturnValue: Result<UserSessionProtocol, QRCodeLoginServiceError>!
-    var loginWithQRCodeDataReturnValue: Result<UserSessionProtocol, QRCodeLoginServiceError>! {
+    var requestAuthorizationIfNeededUnderlyingReturnValue: Bool!
+    var requestAuthorizationIfNeededReturnValue: Bool! {
         get {
             if Thread.isMainThread {
-                return loginWithQRCodeDataUnderlyingReturnValue
+                return requestAuthorizationIfNeededUnderlyingReturnValue
             } else {
-                var returnValue: Result<UserSessionProtocol, QRCodeLoginServiceError>? = nil
+                var returnValue: Bool? = nil
                 DispatchQueue.main.sync {
-                    returnValue = loginWithQRCodeDataUnderlyingReturnValue
+                    returnValue = requestAuthorizationIfNeededUnderlyingReturnValue
                 }
 
                 return returnValue!
@@ -7286,24 +7163,22 @@ class QRCodeLoginServiceMock: QRCodeLoginServiceProtocol {
         }
         set {
             if Thread.isMainThread {
-                loginWithQRCodeDataUnderlyingReturnValue = newValue
+                requestAuthorizationIfNeededUnderlyingReturnValue = newValue
             } else {
                 DispatchQueue.main.sync {
-                    loginWithQRCodeDataUnderlyingReturnValue = newValue
+                    requestAuthorizationIfNeededUnderlyingReturnValue = newValue
                 }
             }
         }
     }
-    var loginWithQRCodeDataClosure: ((Data) async -> Result<UserSessionProtocol, QRCodeLoginServiceError>)?
+    var requestAuthorizationIfNeededClosure: (() async -> Bool)?
 
-    func loginWithQRCode(data: Data) async -> Result<UserSessionProtocol, QRCodeLoginServiceError> {
-        loginWithQRCodeDataCallsCount += 1
-        loginWithQRCodeDataReceivedData = data
-        loginWithQRCodeDataReceivedInvocations.append(data)
-        if let loginWithQRCodeDataClosure = loginWithQRCodeDataClosure {
-            return await loginWithQRCodeDataClosure(data)
+    func requestAuthorizationIfNeeded() async -> Bool {
+        requestAuthorizationIfNeededCallsCount += 1
+        if let requestAuthorizationIfNeededClosure = requestAuthorizationIfNeededClosure {
+            return await requestAuthorizationIfNeededClosure()
         } else {
-            return loginWithQRCodeDataReturnValue
+            return requestAuthorizationIfNeededReturnValue
         }
     }
 }
@@ -9903,70 +9778,6 @@ class RoomProxyMock: RoomProxyProtocol {
             return elementCallWidgetDriverClosure()
         } else {
             return elementCallWidgetDriverReturnValue
-        }
-    }
-    //MARK: - sendCallNotificationIfNeeeded
-
-    var sendCallNotificationIfNeeededUnderlyingCallsCount = 0
-    var sendCallNotificationIfNeeededCallsCount: Int {
-        get {
-            if Thread.isMainThread {
-                return sendCallNotificationIfNeeededUnderlyingCallsCount
-            } else {
-                var returnValue: Int? = nil
-                DispatchQueue.main.sync {
-                    returnValue = sendCallNotificationIfNeeededUnderlyingCallsCount
-                }
-
-                return returnValue!
-            }
-        }
-        set {
-            if Thread.isMainThread {
-                sendCallNotificationIfNeeededUnderlyingCallsCount = newValue
-            } else {
-                DispatchQueue.main.sync {
-                    sendCallNotificationIfNeeededUnderlyingCallsCount = newValue
-                }
-            }
-        }
-    }
-    var sendCallNotificationIfNeeededCalled: Bool {
-        return sendCallNotificationIfNeeededCallsCount > 0
-    }
-
-    var sendCallNotificationIfNeeededUnderlyingReturnValue: Result<Void, RoomProxyError>!
-    var sendCallNotificationIfNeeededReturnValue: Result<Void, RoomProxyError>! {
-        get {
-            if Thread.isMainThread {
-                return sendCallNotificationIfNeeededUnderlyingReturnValue
-            } else {
-                var returnValue: Result<Void, RoomProxyError>? = nil
-                DispatchQueue.main.sync {
-                    returnValue = sendCallNotificationIfNeeededUnderlyingReturnValue
-                }
-
-                return returnValue!
-            }
-        }
-        set {
-            if Thread.isMainThread {
-                sendCallNotificationIfNeeededUnderlyingReturnValue = newValue
-            } else {
-                DispatchQueue.main.sync {
-                    sendCallNotificationIfNeeededUnderlyingReturnValue = newValue
-                }
-            }
-        }
-    }
-    var sendCallNotificationIfNeeededClosure: (() async -> Result<Void, RoomProxyError>)?
-
-    func sendCallNotificationIfNeeeded() async -> Result<Void, RoomProxyError> {
-        sendCallNotificationIfNeeededCallsCount += 1
-        if let sendCallNotificationIfNeeededClosure = sendCallNotificationIfNeeededClosure {
-            return await sendCallNotificationIfNeeededClosure()
-        } else {
-            return sendCallNotificationIfNeeededReturnValue
         }
     }
     //MARK: - matrixToPermalink
@@ -13116,34 +12927,6 @@ class UserNotificationCenterMock: UserNotificationCenterProtocol {
             return authorizationStatusReturnValue
         }
     }
-}
-class UserSessionMock: UserSessionProtocol {
-    var clientProxy: ClientProxyProtocol {
-        get { return underlyingClientProxy }
-        set(value) { underlyingClientProxy = value }
-    }
-    var underlyingClientProxy: ClientProxyProtocol!
-    var mediaProvider: MediaProviderProtocol {
-        get { return underlyingMediaProvider }
-        set(value) { underlyingMediaProvider = value }
-    }
-    var underlyingMediaProvider: MediaProviderProtocol!
-    var voiceMessageMediaManager: VoiceMessageMediaManagerProtocol {
-        get { return underlyingVoiceMessageMediaManager }
-        set(value) { underlyingVoiceMessageMediaManager = value }
-    }
-    var underlyingVoiceMessageMediaManager: VoiceMessageMediaManagerProtocol!
-    var sessionSecurityStatePublisher: CurrentValuePublisher<SessionSecurityState, Never> {
-        get { return underlyingSessionSecurityStatePublisher }
-        set(value) { underlyingSessionSecurityStatePublisher = value }
-    }
-    var underlyingSessionSecurityStatePublisher: CurrentValuePublisher<SessionSecurityState, Never>!
-    var callbacks: PassthroughSubject<UserSessionCallback, Never> {
-        get { return underlyingCallbacks }
-        set(value) { underlyingCallbacks = value }
-    }
-    var underlyingCallbacks: PassthroughSubject<UserSessionCallback, Never>!
-
 }
 class VoiceMessageCacheMock: VoiceMessageCacheProtocol {
     var urlForRecording: URL {
